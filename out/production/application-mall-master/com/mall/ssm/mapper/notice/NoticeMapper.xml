@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.notice.NoticeMapper" >
+
+	<!-- 公告属性字段 -->
+	<sql id="notice_column_simple">
+		id,uid,title,updatetime,published,content,type
+	</sql>
+	<sql id="notice_columns">
+		a.id AS "id",
+		a.uid AS "uid",
+		a.title AS "title",
+		a.content AS "content",
+		a.updatetime AS "updatetime",
+		a.published AS "published",
+		a.type AS "type"
+	</sql>
+	
+	<!-- 定义公告查询的sql片段,就是公告查询条件 -->
+	<sql id="query_notice_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="noticeCustom!=null">
+			1=1
+    		<if test="noticeCustom.id != null and noticeCustom.id != ''">
+				AND a.id = #{noticeCustom.id}
+			</if>
+			<if test="noticeCustom.title != null and noticeCustom.title != ''">
+				AND a.title = #{noticeCustom.title}
+			</if>
+			<if test="noticeCustom.content != null and noticeCustom.content != ''">
+				AND a.content = #{noticeCustom.content}
+			</if>
+			<if test="noticeCustom.updatetime != null and noticeCustom.updatetime != ''">
+				AND a.updatetime = #{noticeCustom.updatetime}
+			</if>
+			<if test="noticeCustom.published != null and noticeCustom.published != ''">
+				AND a.published = #{noticeCustom.published}
+			</if>
+			<if test="noticeCustom.type != null and noticeCustom.type != ''">
+				AND a.type = #{noticeCustom.type}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.NoticeVo" resultType="com.mall.ssm.po.custom.NoticeCustom" >
+    	select
+    		<include refid="notice_columns"/>
+    	from notice a
+    	<where>
+			<include refid="query_notice_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.NoticeVo" resultType="Long">
+        select count(id) from notice a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.NoticeVo" resultType="com.mall.ssm.po.custom.NoticeCustom">
+		select
+    		<include refid="notice_columns"/>
+    	from notice a
+    	<where>
+			<include refid="query_notice_where"></include>
+		</where>
+    	LIMIT #{noticeCustom.start},#{noticeCustom.limit}
+    	
+    	<!-- sqlserver用这个
+    	
+    	SELECT
+			      TOP ${limit} *
+			  FROM
+			      (
+			          SELECT
+			              ROW_NUMBER () OVER (ORDER BY id ASC) RowNumber ,<include refid="columns"/>
+			          FROM
+			              sys_notice a
+			      ) A
+			 WHERE
+			     A.RowNumber > (#{start} - 1) * #{limit}
+    	 -->
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.NoticeCustom" parameterType="com.mall.ssm.po.vo.NoticeVo" >
+    	select
+    		<include refid="notice_columns"/>
+    	from notice a
+    	<where>
+			<include refid="query_notice_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.NoticeVo">
+		INSERT INTO notice(
+			<include refid="notice_column_simple"/>
+		) VALUES (
+			#{noticeCustom.id},
+			#{noticeCustom.uid},
+			#{noticeCustom.title},
+			#{noticeCustom.updatetime},
+			#{noticeCustom.published},
+			#{noticeCustom.content},
+			#{noticeCustom.type}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.NoticeVo">
+    	update notice a
+    	<set>
+      		<if test="noticeCustom.uid != null" >
+        		a.uid = #{noticeCustom.uid},
+	      	</if>
+	      	<if test="noticeCustom.title != null" >
+	        	a.title = #{noticeCustom.title},
+	      	</if>
+      		<if test="noticeCustom.type != null" >
+	        	a.type = #{noticeCustom.type},
+	      	</if>
+	      	<if test="noticeCustom.content != null" >
+	        	a.content = #{noticeCustom.content},
+	      	</if>
+	      	<if test="noticeCustom.updatetime != null" >
+	        	a.updatetime = #{noticeCustom.updatetime},
+	      	</if>
+	      	<if test="noticeCustom.published != null" >
+	        	a.published = #{noticeCustom.published},
+	      	</if>
+    	</set>
+    	where a.id = #{noticeCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from notice
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+</mapper>

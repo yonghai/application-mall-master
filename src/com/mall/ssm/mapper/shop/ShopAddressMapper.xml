@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.shop.ShopAddressMapper" >
+
+	<!-- 收货地址字段 -->
+	<sql id="property_column_simple">
+		id,provinceId,cityId,districtId,linkMan,address,mobile,code,appid,isDefault
+	</sql>
+	<sql id="property_columns">
+		a.id AS "id",
+		a.provinceId AS "provinceId",
+		a.cityId AS "cityId",
+		a.districtId AS "districtId",
+		a.linkMan AS "linkMan",
+		a.address AS "address",
+		a.mobile AS "mobile",
+		a.code AS "code",
+		a.appid AS "appid",
+		a.isDefault AS "isDefault"
+	</sql>
+	
+	<!-- 定义收货地址查询的sql片段,就是收货地址查询条件 -->
+	<sql id="query_property_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom传递 -->
+		<if test="shopAddressCustom!=null">
+			1=1
+    		<if test="shopAddressCustom.id != null and shopAddressCustom.id != ''">
+				AND a.id = #{shopAddressCustom.id}
+			</if>
+			<if test="shopAddressCustom.provinceId != null and shopAddressCustom.provinceId != ''">
+				AND a.provinceId = #{shopAddressCustom.provinceId}
+			</if>
+			<if test="shopAddressCustom.cityId != null and shopAddressCustom.cityId != ''">
+				AND a.cityId = #{shopAddressCustom.cityId}
+			</if>
+			<if test="shopAddressCustom.districtId != null and shopAddressCustom.districtId != ''">
+				AND a.districtId = #{shopAddressCustom.districtId}
+			</if>
+			<if test="shopAddressCustom.linkMan != null and shopAddressCustom.linkMan != ''">
+				AND a.linkMan = #{shopAddressCustom.linkMan}
+			</if>
+			<if test="shopAddressCustom.address != null and shopAddressCustom.address != ''">
+				AND a.address = #{shopAddressCustom.address}
+			</if>
+			<if test="shopAddressCustom.mobile != null and shopAddressCustom.mobile != ''">
+				AND a.mobile = #{shopAddressCustom.mobile}
+			</if>
+			<if test="shopAddressCustom.code != null and shopAddressCustom.code != ''">
+				AND a.code = #{shopAddressCustom.code}
+			</if>
+			<if test="shopAddressCustom.appid != null and shopAddressCustom.appid != ''">
+				AND a.appid = #{shopAddressCustom.appid}
+			</if>
+			<if test="shopAddressCustom.isDefault != null and shopAddressCustom.isDefault != ''">
+				AND a.isDefault = #{shopAddressCustom.isDefault}
+			</if>
+		</if>
+	</sql>
+	
+	<resultMap type="com.mall.ssm.po.custom.ShopAddressCustom" id="ShopAddressResultMap">
+		<id column="id" property="id"/>
+		<result column="provinceId" property="provinceId"/>
+		<result column="cityId" property="cityId"/>
+		<result column="districtId" property="districtId"/>
+		<result column="linkMan" property="linkMan"/>
+		<result column="address" property="address"/>
+		<result column="mobile" property="mobile"/>
+		<result column="code" property="code"/>
+		<result column="appid" property="appid"/>
+		<result column="isDefault" property="isDefault"/>
+	</resultMap>
+	
+	<resultMap type="com.mall.ssm.po.custom.ShopAddressCustom" id="ShopAddressAllResultMap" extends="ShopAddressResultMap">
+		<!-- 使用extends继承 -->
+		
+		<association property="province"  javaType="com.mall.ssm.po.dto.ProvinceDto"
+		 	select="com.mall.ssm.mapper.shop.AddressMapper.getProvince" column="provinceId">
+		</association>
+		<association property="city"  javaType="com.mall.ssm.po.dto.CityDto"
+		 	select="com.mall.ssm.mapper.shop.AddressMapper.getCity" column="cityId">
+		</association>
+		<association property="county"  javaType="com.mall.ssm.po.dto.CountyDto"
+		 	select="com.mall.ssm.mapper.shop.AddressMapper.getCounty" column="districtId">
+		</association>
+	</resultMap>
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.ShopAddressVo" resultMap="ShopAddressAllResultMap">
+    	select
+    		<include refid="property_columns"/>
+    	from tb_shopping_address a
+    	<where>
+			<include refid="query_property_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.ShopAddressVo" resultType="Long">
+        select count(id) from tb_shopping_address a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.ShopAddressVo" resultType="com.mall.ssm.po.custom.ShopAddressCustom">
+		select
+    		<include refid="property_columns"/>
+    	from tb_shopping_address a
+    	<where>
+			<include refid="query_property_where"></include>
+		</where>
+    	LIMIT #{shopAddressCustom.start},#{shopAddressCustom.limit}
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.ShopAddressCustom" parameterType="com.mall.ssm.po.vo.ShopAddressVo" >
+    	select
+    		<include refid="property_columns"/>
+    	from tb_shopping_address a
+    	<where>
+			<include refid="query_property_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.ShopAddressVo">
+		INSERT INTO tb_shopping_address(
+			<include refid="property_column_simple"/>
+		) VALUES (
+			#{shopAddressCustom.id},
+			#{shopAddressCustom.provinceId},
+			#{shopAddressCustom.cityId},
+			#{shopAddressCustom.districtId},
+			#{shopAddressCustom.linkMan},
+			#{shopAddressCustom.address},
+			#{shopAddressCustom.mobile},
+			#{shopAddressCustom.code},
+			#{shopAddressCustom.appid},
+			#{shopAddressCustom.isDefault}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.ShopAddressVo">
+    	update tb_shopping_address a
+    	<set>
+      		<if test="shopAddressCustom.linkMan != null" >
+        		a.linkMan = #{shopAddressCustom.linkMan},
+	      	</if>
+	      	<if test="shopAddressCustom.provinceId != null" >
+	        	a.provinceId = #{shopAddressCustom.provinceId},
+	      	</if>
+      		<if test="shopAddressCustom.cityId != null" >
+	        	a.cityId = #{shopAddressCustom.cityId},
+	      	</if>
+	      	<if test="shopAddressCustom.districtId != null" >
+	        	a.districtId = #{shopAddressCustom.districtId},
+	      	</if>
+	      	<if test="shopAddressCustom.address != null" >
+	        	a.address = #{shopAddressCustom.address},
+	      	</if>
+	      	<if test="shopAddressCustom.mobile != null" >
+	        	a.mobile = #{shopAddressCustom.mobile},
+	      	</if>
+	      	<if test="shopAddressCustom.code != null" >
+	        	a.code = #{shopAddressCustom.code},
+	      	</if>
+	      	<if test="shopAddressCustom.appid != null" >
+	        	a.appid = #{shopAddressCustom.appid},
+	      	</if>
+	      	<if test="shopAddressCustom.isDefault != null" >
+	        	a.isDefault = #{shopAddressCustom.isDefault},
+	      	</if>
+    	</set>
+    	where a.id = #{shopAddressCustom.id,jdbcType=INTEGER}
+  	</update>
+  	<update id="updateDefaultAddress" parameterType="com.mall.ssm.po.vo.ShopAddressVo">
+    	update tb_shopping_address a
+    	<set>
+	      	<if test="shopAddressCustom.isDefault != null" >
+	        	a.isDefault = #{shopAddressCustom.isDefault},
+	      	</if>
+    	</set>
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from tb_shopping_address
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+</mapper>

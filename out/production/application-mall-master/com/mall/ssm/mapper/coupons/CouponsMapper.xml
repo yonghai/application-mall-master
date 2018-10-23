@@ -1,0 +1,263 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.coupons.CouponsMapper" >
+
+	<!-- 优惠券属性字段 -->
+	<sql id="coupons_column_simple">
+		id,money,name,moneyHreshold,dateEnd,openid,status,type,flag
+	</sql>
+	<sql id="coupons_columns">
+		a.id AS "id",
+		a.money AS "money",
+		a.name AS "name",
+		a.moneyHreshold AS "moneyHreshold",
+		a.dateEnd AS "dateEnd",
+		a.openid AS "openid",
+		a.status AS "status",
+		a.type AS "type",
+		a.flag AS "flag"
+	</sql>
+	
+	<!-- 定义优惠券查询的sql片段,就是优惠券查询条件 -->
+	<sql id="query_coupons_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="couponsCustom!=null">
+			1=1
+    		<if test="couponsCustom.id != null and couponsCustom.id != ''">
+				AND a.id = #{couponsCustom.id}
+			</if>
+			<if test="couponsCustom.money != null and couponsCustom.money != ''">
+				AND a.money = #{couponsCustom.money}
+			</if>
+			<if test="couponsCustom.name != null and couponsCustom.name != ''">
+				AND a.name = #{couponsCustom.name}
+			</if>
+			<if test="couponsCustom.moneyHreshold != null and couponsCustom.moneyHreshold != ''">
+				AND a.moneyHreshold = #{couponsCustom.moneyHreshold}
+			</if>
+			<if test="couponsCustom.dateEnd != null and couponsCustom.dateEnd != ''">
+				AND a.dateEnd = #{couponsCustom.dateEnd}
+			</if>
+			<if test="couponsCustom.openid != null and couponsCustom.openid != ''">
+				AND a.openid = #{couponsCustom.openid}
+			</if>
+			<if test="couponsCustom.status != null and couponsCustom.status != ''">
+				AND a.status = #{couponsCustom.status}
+			</if>
+			<if test="couponsCustom.type != null and couponsCustom.type != ''">
+				AND a.type = #{couponsCustom.type}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.CouponsVo" resultType="com.mall.ssm.po.custom.CouponsCustom" >
+    	select
+    		<include refid="coupons_columns"/>
+    	from coupons a
+    	<where>
+			<include refid="query_coupons_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.CouponsVo" resultType="Long">
+        select count(id) from coupons a
+	</select>
+	
+	<resultMap type="com.mall.ssm.po.custom.CouponsCustom" id="CouponsResultMap">
+		<id column="id" property="id"/>
+		<result column="money" property="money"/>
+		<result column="name" property="name"/>
+		<result column="moneyHreshold" property="moneyHreshold"/>
+		<result column="dateEnd" property="dateEnd"/>
+		<result column="openid" property="openid"/>
+		<result column="status" property="status"/>
+		<result column="type" property="type"/>
+		<result column="flag" property="flag"/>
+	</resultMap>
+	<resultMap type="com.mall.ssm.po.custom.CouponsCustom" id="CouponsWithUserResultMap" extends="CouponsResultMap">
+		<!-- 使用extends继承 -->
+		<association property="wxUserCustom"  javaType="com.mall.ssm.po.custom.WxUserCustom"
+		 	select="com.mall.ssm.mapper.wx.WxUserMapper.getUserById" column="openid">
+		</association>
+	</resultMap>
+	
+	<select id="getFetchListByPage" parameterType="com.mall.ssm.po.vo.CouponsVo" resultMap="CouponsWithUserResultMap">
+		select
+    		<include refid="coupons_columns"/>
+    	from coupons a 
+    	<where>
+			<include refid="query_coupons_where"></include>
+		</where>
+		AND a.flag=#{couponsCustom.flag}
+    	LIMIT #{couponsCustom.start},#{couponsCustom.limit}
+	</select>	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.CouponsVo" resultType="com.mall.ssm.po.custom.CouponsCustom">
+		select
+    		<include refid="coupons_columns"/>
+    	from coupons a
+    	<where>
+			<include refid="query_coupons_where"></include>
+		</where>
+    	LIMIT #{couponsCustom.start},#{couponsCustom.limit}
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.CouponsCustom" parameterType="com.mall.ssm.po.vo.CouponsVo" >
+    	select
+    		<include refid="coupons_columns"/>
+    	from coupons a
+    	<where>
+			<include refid="query_coupons_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.CouponsVo">
+		INSERT INTO coupons(
+			<include refid="coupons_column_simple"/>
+		) VALUES (
+			#{couponsCustom.id},
+			#{couponsCustom.money},
+			#{couponsCustom.name},
+			#{couponsCustom.moneyHreshold},
+			#{couponsCustom.dateEnd},
+			#{couponsCustom.openid},
+			#{couponsCustom.status},
+			#{couponsCustom.type},
+			#{couponsCustom.flag}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.CouponsVo">
+    	update coupons a
+    	<set>
+      		<if test="couponsCustom.money != null" >
+        		a.money = #{couponsCustom.money},
+	      	</if>
+	      	<if test="couponsCustom.name != null" >
+	        	a.name = #{couponsCustom.name},
+	      	</if>
+      		<if test="couponsCustom.type != null" >
+	        	a.type = #{couponsCustom.type},
+	      	</if>
+	      	<if test="couponsCustom.moneyHreshold != null" >
+	        	a.moneyHreshold = #{couponsCustom.moneyHreshold},
+	      	</if>
+	      	<if test="couponsCustom.dateEnd != null" >
+	        	a.dateEnd = #{couponsCustom.dateEnd},
+	      	</if>
+	      	<if test="couponsCustom.openid != null" >
+	        	a.openid = #{couponsCustom.openid},
+	      	</if>
+	      	<if test="couponsCustom.status != null" >
+	        	a.status = #{couponsCustom.status},
+	      	</if>
+    	</set>
+    	where a.id = #{couponsCustom.id,jdbcType=INTEGER}
+  	</update>
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from coupons
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<insert id="insertCoupons" parameterType="com.mall.ssm.po.vo.CouponsVo">
+		INSERT INTO coupons_published(
+			id,money,name,moneyHreshold,dateEnd,status,type,flag,stores,remain
+		) VALUES (
+			#{couponsCustom.id},
+			#{couponsCustom.money},
+			#{couponsCustom.name},
+			#{couponsCustom.moneyHreshold},
+			#{couponsCustom.dateEnd},
+			#{couponsCustom.status},
+			#{couponsCustom.type},
+			#{couponsCustom.flag},
+			#{couponsCustom.stores},
+			#{couponsCustom.remain}
+		)
+	</insert>
+	
+	
+	<select id="getCouponsPublished" parameterType="com.mall.ssm.po.vo.CouponsVo" resultType="com.mall.ssm.po.custom.CouponsCustom" >
+    	select
+    		*
+    	from coupons_published a where status=0
+    	LIMIT #{couponsCustom.start},#{couponsCustom.limit}
+	 </select>
+	<select id="getCouponsPublishedById" parameterType="com.mall.ssm.po.vo.CouponsVo" resultType="com.mall.ssm.po.custom.CouponsCustom" >
+    	select
+    		*
+    	from coupons_published a where id=#{couponsCustom.id}
+	 </select>
+	
+	<update id="updateCouponsPublished" parameterType="com.mall.ssm.po.vo.CouponsVo">
+    	update coupons a
+    	<set>
+      		<if test="couponsCustom.money != null" >
+        		a.money = #{couponsCustom.money},
+	      	</if>
+	      	<if test="couponsCustom.name != null" >
+	        	a.name = #{couponsCustom.name},
+	      	</if>
+      		<if test="couponsCustom.type != null" >
+	        	a.type = #{couponsCustom.type},
+	      	</if>
+	      	<if test="couponsCustom.moneyHreshold != null" >
+	        	a.moneyHreshold = #{couponsCustom.moneyHreshold},
+	      	</if>
+	      	<if test="couponsCustom.dateEnd != null" >
+	        	a.dateEnd = #{couponsCustom.dateEnd},
+	      	</if>
+	      	<if test="couponsCustom.stores != null" >
+	        	a.stores = #{couponsCustom.stores},
+	      	</if>
+	      	<if test="couponsCustom.status != null" >
+	        	a.status = #{couponsCustom.status},
+	      	</if>
+	      	<if test="couponsCustom.remain != null" >
+	        	a.remain = #{couponsCustom.remain},
+	      	</if>
+    	</set>
+    	where a.flag = #{couponsCustom.flag}
+  	</update>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<delete id="deleteCouponsAll" parameterType="string">
+		DELETE a.*, b.*
+		FROM coupons a, coupons_published b
+		WHERE a.flag = b.flag AND a.flag=#{flag}
+	</delete>
+</mapper>

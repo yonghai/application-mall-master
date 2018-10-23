@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.photo.PhotoMapper" >
+
+	<!-- 图片属性字段 -->
+	<sql id="photo_column_simple">
+		id,photoName,photoSize,photoType,photoTime,photoAddress,username,smallPhoto
+	</sql>
+	<sql id="photo_columns">
+		a.id AS "id",
+		a.photoName AS "photoName",
+		a.photoSize AS "photoSize",
+		a.photoType AS "photoType",
+		a.photoTime AS "photoTime",
+		a.photoAddress AS "photoAddress",
+		a.username AS "username",
+		a.smallPhoto AS "smallPhoto"
+	</sql>
+	
+	<!-- 定义图片查询的sql片段,就是图片查询条件 -->
+	<sql id="query_photo_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="photoCustom!=null">
+			1=1
+    		<if test="photoCustom.id != null and photoCustom.id != ''">
+				AND a.id = #{photoCustom.id}
+			</if>
+			<if test="photoCustom.photoName != null and photoCustom.photoName != ''">
+				AND a.photoName = #{photoCustom.photoName}
+			</if>
+			<if test="photoCustom.photoSize != null and photoCustom.photoSize != ''">
+				AND a.photoSize = #{photoCustom.photoSize}
+			</if>
+			<if test="photoCustom.photoType != null and photoCustom.photoType != ''">
+				AND a.photoType = #{photoCustom.photoType}
+			</if>
+			<if test="photoCustom.photoTime != null and photoCustom.photoTime != ''">
+				AND a.photoTime = #{photoCustom.photoTime}
+			</if>
+			<if test="photoCustom.photoAddress != null and photoCustom.photoAddress != ''">
+				AND a.photoAddress = #{photoCustom.photoAddress}
+			</if>
+			<if test="photoCustom.username != null and photoCustom.username != ''">
+				AND a.username = #{photoCustom.username}
+			</if>
+			<if test="photoCustom.smallPhoto != null and photoCustom.smallPhoto != ''">
+				AND a.smallPhoto = #{photoCustom.smallPhoto}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.PhotoVo" resultType="com.mall.ssm.po.custom.PhotoCustom" >
+    	select
+    		<include refid="photo_columns"/>
+    	from photo a
+    	<where>
+			<include refid="query_photo_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.PhotoVo" resultType="Long">
+        select count(id) from photo a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.PhotoVo" resultType="com.mall.ssm.po.custom.PhotoCustom">
+		select
+    		<include refid="photo_columns"/>
+    	from photo a
+    	<where>
+			<include refid="query_photo_where"></include>
+		</where>
+    	LIMIT #{photoCustom.start},#{photoCustom.limit}
+    	
+    	<!-- sqlserver用这个
+    	
+    	SELECT
+			      TOP ${limit} *
+			  FROM
+			      (
+			          SELECT
+			              ROW_NUMBER () OVER (ORDER BY id ASC) RowNumber ,<include refid="columns"/>
+			          FROM
+			              sys_photo a
+			      ) A
+			 WHERE
+			     A.RowNumber > (#{start} - 1) * #{limit}
+    	 -->
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.PhotoCustom" parameterType="com.mall.ssm.po.vo.PhotoVo" >
+    	select
+    		<include refid="photo_columns"/>
+    	from photo a
+    	<where>
+			<include refid="query_photo_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.PhotoVo">
+		INSERT INTO photo(
+			<include refid="photo_column_simple"/>
+		) VALUES (
+			#{photoCustom.id},
+			#{photoCustom.photoName},
+			#{photoCustom.photoSize},
+			#{photoCustom.photoType},
+			#{photoCustom.photoTime},
+			#{photoCustom.photoAddress},
+			#{photoCustom.username},
+			#{photoCustom.smallPhoto}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.PhotoVo" >
+    	update photo
+    	<set >
+      		<if test="photoCustom.loginName != null" >
+        		loginName = #{photoCustom.photoName},
+	      	</if>
+	      	<if test="photoCustom.photoType != null" >
+	        	photoType = #{photoCustom.photoCustom.photoType},
+	      	</if>
+      		<if test="photoCustom.photoSize != null" >
+	        	photoSize = #{photoCustom.photoSize},
+	      	</if>
+	      	<if test="photoCustom.photoTime != null" >
+	        	photoTime = #{photoCustom.photoTime},
+	      	</if>
+	      	<if test="photoCustom.photoAddress != null" >
+	        	photoAddress = #{photoCustom.photoAddress},
+	      	</if>
+	      	<if test="photoCustom.username != null" >
+	        	username = #{photoCustom.username},
+	      	</if>
+	      	<if test="photoCustom.smallPhoto != null" >
+	        	smallPhoto = #{photoCustom.smallPhoto},
+	      	</if>
+    	</set>
+    	where id = #{userCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from photo
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+</mapper>

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.productcategory.ProductCategoryMapper" >
+
+	<!-- 图片属性字段 -->
+	<sql id="productCategory_column_simple">
+		id,uid,name,orderBy
+	</sql>
+	<sql id="productCategory_columns">
+		a.id AS "id",
+		a.uid AS "uid",
+		a.name AS "name",
+		a.orderBy AS "orderBy"
+	</sql>
+	
+	<!-- 定义图片查询的sql片段,就是图片查询条件 -->
+	<sql id="query_productCategory_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="productCategoryCustom!=null">
+			1=1
+    		<if test="productCategoryCustom.id != null and productCategoryCustom.id != ''">
+				AND a.id = #{productCategoryCustom.id}
+			</if>
+			<if test="productCategoryCustom.uid != null and productCategoryCustom.uid != ''">
+				AND a.uid = #{productCategoryCustom.uid}
+			</if>
+			<if test="productCategoryCustom.name != null and productCategoryCustom.name != ''">
+				AND a.name = #{productCategoryCustom.name}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.ProductCategoryVo" resultType="com.mall.ssm.po.custom.ProductCategoryCustom" >
+    	select
+    		<include refid="productCategory_columns"/>
+    	from product_category a
+    	<where>
+			<include refid="query_productCategory_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.ProductCategoryVo" resultType="Long">
+        select count(id) from product_category a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.ProductCategoryVo" resultType="com.mall.ssm.po.custom.ProductCategoryCustom">
+		select
+    		<include refid="productCategory_columns"/>
+    	from product_category a
+    	<where>
+			<include refid="query_productCategory_where"></include>
+		</where>
+		<if test="productCategoryCustom.orderBy != null and productCategoryCustom.orderBy != ''">
+			order by #{productCategoryCustom.orderBy} 
+		</if>
+    	LIMIT #{productCategoryCustom.start},#{productCategoryCustom.limit}
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.ProductCategoryCustom" parameterType="com.mall.ssm.po.vo.ProductCategoryVo" >
+    	select
+    		<include refid="productCategory_columns"/>
+    	from product_category a
+    	<where>
+			<include refid="query_productCategory_where"></include>
+		</where>
+		order by orderBy
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.ProductCategoryVo">
+		INSERT INTO product_category(
+			<include refid="productCategory_column_simple"/>
+		) VALUES (
+			#{productCategoryCustom.id},
+			#{productCategoryCustom.uid},
+			#{productCategoryCustom.name},
+			#{productCategoryCustom.orderBy}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.ProductCategoryVo">
+    	update product_category a
+    	<set>
+      		<if test="productCategoryCustom.uid != null" >
+        		a.uid = #{productCategoryCustom.uid},
+	      	</if>
+	      	<if test="productCategoryCustom.name != null" >
+	        	a.name = #{productCategoryCustom.name},
+	      	</if>
+      		<if test="productCategoryCustom.orderBy != null" >
+	        	a.orderBy = #{productCategoryCustom.orderBy},
+	      	</if>
+    	</set>
+    	where a.id = #{productCategoryCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from product_category
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+</mapper>

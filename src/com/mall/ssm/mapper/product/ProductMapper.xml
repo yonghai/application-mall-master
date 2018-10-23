@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.product.ProductMapper" >
+	
+	<!-- 开启本mapper的namespace下的二级缓存
+	type 指定cache接口的实现类型,mybatis默认使用PerpetualCache
+	要和ehcache整合,需要配置type为ehcache实现cache接口
+	 -->
+	<cache type="org.mybatis.caches.ehcache.EhcacheCache"></cache>
+	
+	
+	<!-- 产品属性字段 -->
+	<sql id="product_column_simple">
+		id,name,pic,cid,minPrice,originalPrice,commission,commissionType,stores,propertyIds,orderBy,uid,dateAdd,dateUpdate,minScore,numberFav,numberGoodReputation,numberOrders,view,published
+	</sql>
+	<sql id="product_columns">
+		a.id AS "id",
+		a.name AS "name",
+		a.pic AS "pic",
+		a.cid AS "cid",
+		a.minPrice AS "minPrice",
+		a.originalPrice AS "originalPrice",
+		a.commission AS "commission",
+		a.commissionType AS "commissionType",
+		a.stores AS "stores",
+		a.propertyIds AS "propertyIds",
+		a.orderBy AS "orderBy",
+		a.uid AS "uid",
+		a.dateAdd AS "dateAdd",
+		a.dateUpdate AS "dateUpdate",
+		a.minScore AS "minScore",
+		a.numberFav AS "numberFav",
+		a.numberGoodReputation AS "numberGoodReputation",
+		a.numberOrders AS "numberOrders",
+		a.view AS "view",
+		a.published AS "published"
+	</sql>
+	
+	<!-- 定义产品查询的sql片段,就是产品查询条件 -->
+	<sql id="query_product_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="productCustom!=null">
+			1=1
+    		<if test="productCustom.id != null and productCustom.id != ''">
+				AND a.id = #{productCustom.id}
+			</if>
+			<if test="productCustom.name != null and productCustom.name != ''">
+				AND a.name = #{productCustom.name}
+			</if>
+			<if test="productCustom.cid != null and productCustom.cid != ''">
+				AND a.cid = #{productCustom.cid}
+			</if>
+			<if test="productCustom.commissionType != null and productCustom.commissionType != ''">
+				AND a.commissionType = #{productCustom.commissionType}
+			</if>
+			<if test="productCustom.published != null and productCustom.published != ''">
+				AND a.published = #{productCustom.published}
+			</if>
+			<if test="productCustom.uid != null and productCustom.uid != ''">
+				AND a.uid = #{productCustom.uid}
+			</if>
+		</if>
+	</sql>
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.ProductVo" resultType="com.mall.ssm.po.custom.ProductCustom" >
+    	select
+    		<include refid="product_columns"/>
+    	from product a
+    	<where>
+			<include refid="query_product_where"></include>
+		</where>
+	 </select>
+	 
+	 <select id="getProductById"  parameterType="int" resultType="com.mall.ssm.po.custom.ProductCustom" >
+    	select a.*
+    	from product a where a.id=#{id}
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.ProductVo" resultType="Long">
+        select count(id) from product a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.ProductVo" resultType="com.mall.ssm.po.custom.ProductCustom">
+		select
+    		<include refid="product_columns"/>
+    	from product a
+    	<where>
+			<include refid="query_product_where"></include>
+		</where>
+		order by a.orderBy
+    	LIMIT #{productCustom.start},#{productCustom.limit}
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.ProductCustom" parameterType="com.mall.ssm.po.vo.ProductVo" >
+    	select
+    		<include refid="product_columns"/>
+    	from product a
+    	<where>
+			<include refid="query_product_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.ProductVo">
+		INSERT INTO product(
+			<include refid="product_column_simple"/>
+		) VALUES (
+			#{productCustom.id},
+			#{productCustom.name},
+			#{productCustom.pic},
+			#{productCustom.cid},
+			#{productCustom.minPrice},
+			#{productCustom.originalPrice},
+			#{productCustom.commission},
+			#{productCustom.commissionType},
+			#{productCustom.stores},
+			#{productCustom.propertyIds},
+			#{productCustom.orderBy},
+			#{productCustom.uid},
+			#{productCustom.dateAdd},
+			#{productCustom.dateUpdate},
+			#{productCustom.minScore},
+			#{productCustom.numberFav},
+			#{productCustom.numberGoodReputation},
+			#{productCustom.numberOrders},
+			#{productCustom.view},
+			#{productCustom.published}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.ProductVo">
+    	update product a
+    	<set>
+      		<if test="productCustom.uid != null" >
+        		a.uid = #{productCustom.uid},
+	      	</if>
+	      	<if test="productCustom.name != null" >
+	        	a.name = #{productCustom.name},
+	      	</if>
+      		<if test="productCustom.pic != null" >
+	        	a.pic = #{productCustom.pic},
+	      	</if>
+	      	<if test="productCustom.cid != null" >
+	        	a.cid = #{productCustom.cid},
+	      	</if>
+	      	<if test="productCustom.minPrice != null" >
+	        	a.minPrice = #{productCustom.minPrice},
+	      	</if>
+	      	<if test="productCustom.published != null" >
+	        	a.published = #{productCustom.published},
+	      	</if>
+	      	
+	      	<if test="productCustom.originalPrice != null" >
+	        	a.originalPrice = #{productCustom.originalPrice},
+	      	</if>
+	      	<if test="productCustom.commission != null" >
+	        	a.commission = #{productCustom.commission},
+	      	</if>
+	      	<if test="productCustom.commissionType != null" >
+	        	a.commissionType = #{productCustom.commissionType},
+	      	</if>
+	      	<if test="productCustom.stores != null" >
+	        	a.stores = #{productCustom.stores},
+	      	</if>
+	      	<if test="productCustom.propertyIds != null" >
+	        	a.propertyIds = #{productCustom.propertyIds},
+	      	</if>
+	      	<if test="productCustom.orderBy != null" >
+	        	a.orderBy = #{productCustom.orderBy},
+	      	</if>
+	      	<if test="productCustom.dateAdd != null" >
+	        	a.dateAdd = #{productCustom.dateAdd},
+	      	</if>
+	      	<if test="productCustom.dateUpdate != null" >
+	        	a.dateUpdate = #{productCustom.dateUpdate},
+	      	</if>
+	      	<if test="productCustom.minScore != null" >
+	        	a.minScore = #{productCustom.minScore},
+	      	</if>
+	      	<if test="productCustom.numberFav != null" >
+	        	a.numberFav = #{productCustom.numberFav},
+	      	</if>
+	      	<if test="productCustom.numberGoodReputation != null" >
+	        	a.numberGoodReputation = #{productCustom.numberGoodReputation},
+	      	</if>
+	      	<if test="productCustom.numberOrders != null" >
+	        	a.numberOrders = #{productCustom.numberOrders},
+	      	</if>
+	      	<if test="productCustom.view != null" >
+	        	a.view = #{productCustom.view},
+	      	</if>
+	
+    	</set>
+    	where a.id = #{productCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from product
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+</mapper>

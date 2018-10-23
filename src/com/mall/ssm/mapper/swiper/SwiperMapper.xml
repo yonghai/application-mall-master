@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.swiper.SwiperMapper" >
+
+	<!-- 图片属性字段 -->
+	<sql id="swiper_column_simple">
+		id,uid,url,thumb,content,updatetime,published,type
+	</sql>
+	<sql id="swiper_columns">
+		a.id AS "id",
+		a.uid AS "uid",
+		a.url AS "url",
+		a.thumb AS "thumb",
+		a.content AS "content",
+		a.updatetime AS "updatetime",
+		a.published AS "published",
+		a.type AS "type"
+	</sql>
+	
+	<!-- 定义图片查询的sql片段,就是图片查询条件 -->
+	<sql id="query_swiper_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="swiperCustom!=null">
+			1=1
+    		<if test="swiperCustom.id != null and swiperCustom.id != ''">
+				AND a.id = #{swiperCustom.id}
+			</if>
+			<if test="swiperCustom.url != null and swiperCustom.url != ''">
+				AND a.url = #{swiperCustom.url}
+			</if>
+			<if test="swiperCustom.thumb != null and swiperCustom.thumb != ''">
+				AND a.thumb = #{swiperCustom.thumb}
+			</if>
+			<if test="swiperCustom.content != null and swiperCustom.content != ''">
+				AND a.content = #{swiperCustom.content}
+			</if>
+			<if test="swiperCustom.updatetime != null and swiperCustom.updatetime != ''">
+				AND a.updatetime = #{swiperCustom.updatetime}
+			</if>
+			<if test="swiperCustom.published != null and swiperCustom.published != ''">
+				AND a.published = #{swiperCustom.published}
+			</if>
+			<if test="swiperCustom.type != null and swiperCustom.type != ''">
+				AND a.type = #{swiperCustom.type}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.SwiperVo" resultType="com.mall.ssm.po.custom.SwiperCustom" >
+    	select
+    		<include refid="swiper_columns"/>
+    	from swiper a
+    	<where>
+			<include refid="query_swiper_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.SwiperVo" resultType="Long">
+        select count(id) from swiper a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.SwiperVo" resultType="com.mall.ssm.po.custom.SwiperCustom">
+		select
+    		<include refid="swiper_columns"/>
+    	from swiper a
+    	<where>
+			<include refid="query_swiper_where"></include>
+		</where>
+    	LIMIT #{swiperCustom.start},#{swiperCustom.limit}
+    	
+    	<!-- sqlserver用这个
+    	
+    	SELECT
+			      TOP ${limit} *
+			  FROM
+			      (
+			          SELECT
+			              ROW_NUMBER () OVER (ORDER BY id ASC) RowNumber ,<include refid="columns"/>
+			          FROM
+			              sys_swiper a
+			      ) A
+			 WHERE
+			     A.RowNumber > (#{start} - 1) * #{limit}
+    	 -->
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.SwiperCustom" parameterType="com.mall.ssm.po.vo.SwiperVo" >
+    	select
+    		<include refid="swiper_columns"/>
+    	from swiper a
+    	<where>
+			<include refid="query_swiper_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.SwiperVo">
+		INSERT INTO swiper(
+			<include refid="swiper_column_simple"/>
+		) VALUES (
+			#{swiperCustom.id},
+			#{swiperCustom.uid},
+			#{swiperCustom.url},
+			#{swiperCustom.thumb},
+			#{swiperCustom.content},
+			#{swiperCustom.updatetime},
+			#{swiperCustom.published},
+			#{swiperCustom.type}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.SwiperVo">
+    	update swiper a
+    	<set>
+      		<if test="swiperCustom.uid != null" >
+        		a.uid = #{swiperCustom.uid},
+	      	</if>
+	      	<if test="swiperCustom.thumb != null" >
+	        	a.thumb = #{swiperCustom.thumb},
+	      	</if>
+      		<if test="swiperCustom.url != null" >
+	        	a.url = #{swiperCustom.url},
+	      	</if>
+	      	<if test="swiperCustom.content != null" >
+	        	a.content = #{swiperCustom.content},
+	      	</if>
+	      	<if test="swiperCustom.updatetime != null" >
+	        	a.updatetime = #{swiperCustom.updatetime},
+	      	</if>
+	      	<if test="swiperCustom.published != null" >
+	        	a.published = #{swiperCustom.published},
+	      	</if>
+	      	<if test="swiperCustom.type != null" >
+	        	a.type = #{swiperCustom.type},
+	      	</if>
+    	</set>
+    	where a.id = #{swiperCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from swiper
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+</mapper>

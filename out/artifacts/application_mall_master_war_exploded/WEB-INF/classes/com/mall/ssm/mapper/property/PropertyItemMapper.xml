@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.property.PropertyItemMapper" >
+
+	<!-- 属性字段字段 -->
+	<sql id="propertyItem_column_simple">
+		id,name,orderBy,updateTime,propertyId
+	</sql>
+	<sql id="propertyItem_columns">
+		a.id AS "id",
+		a.name AS "name",
+		a.orderBy AS "orderBy",
+		a.updateTime AS "updateTime",
+		a.propertyId AS "propertyId"
+	</sql>
+	
+	<!-- 定义属性字段查询的sql片段,就是属性字段查询条件 -->
+	<sql id="query_propertyItem_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom传递 -->
+		<if test="propertyItemCustom!=null">
+			1=1
+    		<if test="propertyItemCustom.id != null and propertyItemCustom.id != ''">
+				AND a.id = #{propertyItemCustom.id}
+			</if>
+			<if test="propertyItemCustom.name != null and propertyItemCustom.name != ''">
+				AND a.name = #{propertyItemCustom.name}
+			</if>
+			<if test="propertyItemCustom.orderBy != null and propertyItemCustom.orderBy != ''">
+				AND a.orderBy = #{propertyItemCustom.orderBy}
+			</if>
+			<if test="propertyItemCustom.updateTime != null and propertyItemCustom.updateTime != ''">
+				AND a.updateTime = #{propertyItemCustom.updateTime}
+			</if>
+			<if test="propertyItemCustom.propertyId != null and propertyItemCustom.propertyId != ''">
+				AND a.propertyId = #{propertyItemCustom.propertyId}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.PropertyItemVo" resultType="com.mall.ssm.po.custom.PropertyItemCustom" >
+    	select
+    		<include refid="propertyItem_columns"/>
+    	from property_item a
+    	<where>
+			<include refid="query_propertyItem_where"></include>
+		</where>
+	 </select>
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.PropertyItemVo" resultType="Long">
+        select count(id) from property_item a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.PropertyItemVo" resultType="com.mall.ssm.po.custom.PropertyItemCustom">
+		select
+    		<include refid="propertyItem_columns"/>
+    	from property_item a
+    	<where>
+			<include refid="query_propertyItem_where"></include>
+		</where>
+		<if test="propertyItemCustom.orderBy != null and propertyItemCustom.orderBy != ''">
+			order by #{propertyItemCustom.orderBy}
+		</if>
+    	LIMIT #{propertyItemCustom.start},#{propertyItemCustom.limit}
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.PropertyItemCustom" parameterType="com.mall.ssm.po.vo.PropertyItemVo" >
+    	select
+    		<include refid="propertyItem_columns"/>
+    	from property_item a
+    	<where>
+			<include refid="query_propertyItem_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.PropertyItemVo">
+		INSERT INTO property_item(
+			<include refid="propertyItem_column_simple"/>
+		) VALUES (
+			#{propertyItemCustom.id},
+			#{propertyItemCustom.name},
+			#{propertyItemCustom.orderBy},
+			#{propertyItemCustom.updateTime},
+			#{propertyItemCustom.propertyId}
+		)
+	</insert>
+	 <insert id="inserBatch"  parameterType="java.util.List">
+	    INSERT INTO property_item(
+			<include refid="propertyItem_column_simple"/>
+		) VALUES
+	       <foreach collection="list" item="item" index="index" separator="," >
+	        (#{item.propertyItemCustom.id},
+			#{item.propertyItemCustom.name},
+			#{item.propertyItemCustom.orderBy},
+			#{item.propertyItemCustom.updateTime},
+			#{item.propertyItemCustom.propertyId})
+	       </foreach>
+	  </insert>
+	<update id="update" parameterType="com.mall.ssm.po.vo.PropertyItemVo">
+    	update property_item a
+    	<set>
+	      	<if test="propertyItemCustom.name != null" >
+	        	a.name = #{propertyItemCustom.name},
+	      	</if>
+      		<if test="propertyItemCustom.orderBy != null" >
+	        	a.orderBy = #{propertyItemCustom.orderBy},
+	      	</if>
+	      	<if test="propertyItemCustom.updateTime != null" >
+	        	a.updateTime = #{propertyItemCustom.updateTime},
+	      	</if>
+	      	<if test="propertyItemCustom.propertyId != null" >
+	        	a.propertyId = #{propertyItemCustom.propertyId},
+	      	</if>
+    	</set>
+    	where a.id = #{propertyItemCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from property_item
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	<delete id="deleteByPropertyId" parameterType="java.lang.Integer">
+	    delete from property_item
+	    where propertyId = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+</mapper>

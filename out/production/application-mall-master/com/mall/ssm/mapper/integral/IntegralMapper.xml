@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.integral.IntegralMapper" >
+
+	<!--  属性字段 -->
+	<sql id="integral_column_simple">
+		id,total,available
+	</sql>
+	<sql id="integraldetail_column_simple">
+		id,appid,operation,available,operationtype,type,time
+	</sql>
+	<sql id="integral_column">
+		a.id AS "id",
+		a.total AS "total",
+		a.available AS "available"
+	</sql>
+	<sql id="integraldetail_column">
+		a.id AS "id",
+		a.appid AS "appid",
+		a.operation AS "operation",
+		a.available AS "available",
+		a.operationtype AS "operationtype",
+		a.type AS "type",
+		a.time AS "time"
+	</sql>
+	<!-- 定义 查询的sql片段,就是 查询条件 -->
+	<sql id="query_integral_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="integralCustom!=null">
+			1=1
+    		<if test="integralCustom.id != null and integralCustom.id != ''">
+				AND a.id = #{integralCustom.id}
+			</if>
+			<!-- 使用mybatis时遇到一个问题，Java代码中传递的整数0在mybatis中被识别成null -->
+			<if test="integralCustom.total != null and integralCustom.total != ''">
+				AND a.total = #{integralCustom.total,jdbcType=INTEGER}
+			</if>
+			<if test="integralCustom.available != null and integralCustom.available != ''">
+				AND a.available = #{integralCustom.available}
+			</if>
+		</if>
+	</sql>
+	
+	<select id="getIntegralById" parameterType="string" resultType="com.mall.ssm.po.custom.IntegralCustom" >
+		select
+    		<include refid="integral_column"/>
+    	from integral 
+    	where id=#{id}
+	</select>
+	<select id="getIntegral" parameterType="com.mall.ssm.po.vo.IntegralVo" resultType="com.mall.ssm.po.custom.IntegralCustom" >
+		select
+    		<include refid="integral_column"/>
+    	from integral a
+    	<where>
+			<include refid="query_integral_where"></include>
+		</where>
+	</select>
+	<select id="getIntegralListByPage" parameterType="com.mall.ssm.po.vo.IntegralVo" resultType="com.mall.ssm.po.custom.IntegralCustom">
+		select
+    		<include refid="integral_column"/>
+    	from integral a
+    	<where>
+			<include refid="query_integral_where"></include>
+		</where>
+    	LIMIT #{integralCustom.start},#{integralCustom.limit}
+	</select>
+	<insert id="insertIntegral" parameterType="com.mall.ssm.po.vo.IntegralVo">
+		INSERT INTO integral(
+			<include refid="integral_column_simple"/>
+		) VALUES (
+			#{integralCustom.id},
+			#{integralCustom.total},
+			#{integralCustom.available}
+		)
+	</insert>
+	<update id="updateIntegral" parameterType="com.mall.ssm.po.vo.IntegralVo">
+    	update integral a
+    	<set>
+	      	<if test="integralCustom.available != null" >
+	        	a.available = #{integralCustom.available},
+	      	</if>
+      		<if test="integralCustom.total != null" >
+	        	a.total = #{integralCustom.total},
+	      	</if>
+    	</set>
+    	where a.id = #{integralCustom.id}
+  	</update>
+	<delete id="deleteIntegral" parameterType="string">
+		DELETE a.*, b.*
+		FROM integral a, integraldetail b
+		WHERE a.id = b.appid AND a.id=#{id}
+	</delete>
+	
+	
+	
+	
+	
+	
+	
+	<resultMap type="com.mall.ssm.po.custom.IntegralDetailCustom" id="IntegralDetailResultMap">
+		<id column="id" property="id"/>
+		<result column="appid" property="appid"/>
+		<result column="operation" property="operation"/>
+		<result column="available" property="available"/>
+		<result column="operationtype" property="operationtype"/>
+		<result column="type" property="type"/>
+		<result column="time" property="time"/>
+	</resultMap>
+	
+	<resultMap type="com.mall.ssm.po.custom.IntegralDetailCustom" id="IntegralAllResultMap" extends="IntegralDetailResultMap">
+		<!-- 使用extends继承 -->
+		
+		<association property="integralCustom"  javaType="com.mall.ssm.po.custom.IntegralCustom"
+		 	select="getIntegralById" column="appid">
+		</association>
+	</resultMap>
+	
+	
+	<select id="getIntegralDetailListByUserId" parameterType="string" resultMap="IntegralAllResultMap">
+    	select
+    		<include refid="integraldetail_column"/>
+    	from integraldetail 
+    	where appid=#{id}
+	 </select>
+	 
+	 <select id="getLaseIntegralDetail" parameterType="string" resultType="com.mall.ssm.po.custom.IntegralDetailCustom">
+    	select * from integraldetail where appid=#{id} order by time desc limit 1
+	 </select>
+	
+	<insert id="insertIntegralDetail" parameterType="com.mall.ssm.po.vo.IntegralDetailVo">
+		INSERT INTO integraldetail(
+			<include refid="integraldetail_column_simple"/>
+		) VALUES (
+			#{integralDetailCustom.id},
+			#{integralDetailCustom.appid},
+			#{integralDetailCustom.operation},
+			#{integralDetailCustom.available},
+			#{integralDetailCustom.operationtype},
+			#{integralDetailCustom.type},
+			#{integralDetailCustom.time}
+		)
+	</insert>
+	<update id="updateIntegralDetail" parameterType="com.mall.ssm.po.vo.IntegralDetailVo">
+    	update integraldetail a
+    	<set>
+	      	<if test="integralDetailCustom.operation != null" >
+	        	a.operation = #{integralDetailCustom.operation},
+	      	</if>
+      		<if test="integralDetailCustom.available != null" >
+	        	a.available = #{integralDetailCustom.available},
+	      	</if>
+	      	<if test="integralDetailCustom.operationtype != null" >
+	        	a.operationtype = #{integralDetailCustom.operationtype},
+	      	</if>
+      		<if test="integralDetailCustom.type != null" >
+	        	a.type = #{integralDetailCustom.type},
+	      	</if>
+	      	<if test="integralDetailCustom.time != null" >
+	        	a.time = #{integralDetailCustom.time},
+	      	</if>
+    	</set>
+    	where a.appid = #{integralDetailCustom.appid}
+  	</update>
+	<delete id="deleteIntegralDetail" parameterType="string">
+		DELETE FROM integraldetail WHERE appid=#{id}
+	</delete>
+</mapper>

@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.property.PropertyMapper" >
+
+	<!-- 图片字段 -->
+	<sql id="property_column_simple">
+		id,name,orderBy,updateTime,uid
+	</sql>
+	<sql id="property_columns">
+		a.id AS "id",
+		a.name AS "name",
+		a.orderBy AS "orderBy",
+		a.updateTime AS "updateTime",
+		a.uid AS "uid"
+	</sql>
+	
+	<!-- 定义图片查询的sql片段,就是图片查询条件 -->
+	<sql id="query_property_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom传递 -->
+		<if test="propertyCustom!=null">
+			1=1
+    		<if test="propertyCustom.id != null and propertyCustom.id != ''">
+				AND a.id = #{propertyCustom.id}
+			</if>
+			<if test="propertyCustom.name != null and propertyCustom.name != ''">
+				AND a.name = #{propertyCustom.name}
+			</if>
+			<if test="propertyCustom.orderBy != null and propertyCustom.orderBy != ''">
+				AND a.orderBy = #{propertyCustom.orderBy}
+			</if>
+			<if test="propertyCustom.updateTime != null and propertyCustom.updateTime != ''">
+				AND a.updateTime = #{propertyCustom.updateTime}
+			</if>
+			<if test="propertyCustom.uid != null and propertyCustom.uid != ''">
+				AND a.uid = #{propertyCustom.uid}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.PropertyVo" resultType="com.mall.ssm.po.custom.PropertyCustom" >
+    	select
+    		<include refid="property_columns"/>
+    	from property a
+    	<where>
+			<include refid="query_property_where"></include>
+		</where>
+	 </select>
+	 
+	 
+	 
+	 
+	 
+	 
+	 <resultMap type="com.mall.ssm.po.custom.PropertyCustom" id="PropertyResultMap">
+		<!-- id：指定查询列中的唯 一标识，订单信息的中的唯 一标识，如果有多个列组成唯一标识，配置多个id
+			column：订单信息的唯 一标识 列
+			property：订单信息的唯 一标识 列所映射到Orders中哪个属性
+			id,name,orderBy,updateTime,uid
+		  -->
+		<id column="id" property="id"/>
+		<result column="name" property="name"/>
+		<result column="orderBy" property="orderBy"/>
+		<result column="updateTime" property="updateTime"/>
+		<result column="uid" property="uid"/>
+	</resultMap>
+	<resultMap type="com.mall.ssm.po.custom.PropertyCustom" id="PropertyAndItemResultMap" extends="PropertyResultMap">
+		<!-- 使用extends继承 -->
+		<!-- 
+		一个关联查询出了多条明细，要使用collection进行映射
+		collection：对关联查询到多条记录映射到集合对象中
+		property：将关联查询到多条记录映射到cn.itcast.mybatis.po.Orders哪个属性
+		ofType：指定映射到list集合属性中pojo的类型
+		 -->
+		 <collection property="propertyItemCustoms" ofType="com.mall.ssm.po.custom.PropertyItemCustom">
+		 	<!-- id： 一标识
+		 	property:要将订单明细的唯 一标识 映射到cn.itcast.mybatis.po.Orderdetail的哪个属性
+		 	  -->
+		 	<id column="item_id" property="id"/>
+		 	<result column="item_name" property="name"/>
+		 	<result column="item_orderBy" property="orderBy"/>
+		 	<result column="item_updatetime" property="updateTime"/>
+		 	<result column="item_propertyId" property="propertyId"/>
+		 </collection>
+		
+	
+	</resultMap>
+	
+	 <select id="getFull" parameterType="com.mall.ssm.po.vo.PropertyVo" resultMap="PropertyAndItemResultMap" >
+    	select a.*,
+		b.id item_id,b.name item_name,b.orderBy item_orderBy,b.updatetime item_updatetime,b.propertyId item_propertyId
+		from property a,property_item b 
+		<where>
+			<include refid="query_property_where"></include>
+		</where>
+		AND a.id=b.propertyId
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.PropertyVo" resultType="Long">
+        select count(id) from property a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.PropertyVo" resultType="com.mall.ssm.po.custom.PropertyCustom">
+		select
+    		<include refid="property_columns"/>
+    	from property a
+    	<where>
+			<include refid="query_property_where"></include>
+		</where>
+		<if test="propertyCustom.orderBy != null and propertyCustom.orderBy != ''">
+			order by #{propertyCustom.orderBy}
+		</if>
+    	LIMIT #{propertyCustom.start},#{propertyCustom.limit}
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.PropertyCustom" parameterType="com.mall.ssm.po.vo.PropertyVo" >
+    	select
+    		<include refid="property_columns"/>
+    	from property a
+    	<where>
+			<include refid="query_property_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.PropertyVo">
+		INSERT INTO property(
+			<include refid="property_column_simple"/>
+		) VALUES (
+			#{propertyCustom.id},
+			#{propertyCustom.name},
+			#{propertyCustom.orderBy},
+			#{propertyCustom.updateTime},
+			#{propertyCustom.uid}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.PropertyVo">
+    	update property a
+    	<set>
+      		<if test="propertyCustom.uid != null" >
+        		a.uid = #{propertyCustom.uid},
+	      	</if>
+	      	<if test="propertyCustom.name != null" >
+	        	a.name = #{propertyCustom.name},
+	      	</if>
+      		<if test="propertyCustom.orderBy != null" >
+	        	a.orderBy = #{propertyCustom.orderBy},
+	      	</if>
+	      	<if test="propertyCustom.updateTime != null" >
+	        	a.updateTime = #{propertyCustom.updateTime},
+	      	</if>
+    	</set>
+    	where a.id = #{propertyCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from property
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+</mapper>

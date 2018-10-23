@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.product.ProductDetailMapper" >
+
+	<!-- 产品介绍属性字段 -->
+	<sql id="product_detail_column_simple">
+		id,pic1,pic2,pic3,content
+	</sql>
+	<sql id="product_detail_columns">
+		a.id AS "id",
+		a.pic1 AS "pic1",
+		a.pic2 AS "pic2",
+		a.pic3 AS "pic3",
+		a.content AS "content"
+	</sql>
+	
+	<!-- 定义产品介绍查询的sql片段,就是产品介绍查询条件 -->
+	<sql id="query_product_detail_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="productDetailCustom!=null">
+			1=1
+    		<if test="productDetailCustom.id != null and productDetailCustom.id != ''">
+				AND a.id = #{productDetailCustom.id}
+			</if>
+			<if test="productDetailCustom.pic2 != null and productDetailCustom.pic2 != ''">
+				AND a.pic2 = #{productDetailCustom.pic2}
+			</if>
+			<if test="productDetailCustom.pic3 != null and productDetailCustom.pic3 != ''">
+				AND a.pic3 = #{productDetailCustom.pic3}
+			</if>
+			<if test="productDetailCustom.pic1 != null and productDetailCustom.pic1 != ''">
+				AND a.pic1 = #{productDetailCustom.pic1}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.ProductDetailVo" resultType="com.mall.ssm.po.custom.ProductDetailCustom" >
+    	select
+    		<include refid="product_detail_columns"/>
+    	from product_detail a
+    	<where>
+			<include refid="query_product_detail_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.ProductDetailVo" resultType="Long">
+        select count(id) from product_detail a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.ProductDetailVo" resultType="com.mall.ssm.po.custom.ProductDetailCustom">
+		select
+    		<include refid="product_detail_columns"/>
+    	from product_detail a
+    	<where>
+			<include refid="query_product_detail_where"></include>
+		</where>
+    	LIMIT #{productDetailCustom.start},#{productDetailCustom.limit}
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.ProductDetailCustom" parameterType="com.mall.ssm.po.vo.ProductDetailVo" >
+    	select
+    		<include refid="product_detail_columns"/>
+    	from product_detail a
+    	<where>
+			<include refid="query_product_detail_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.ProductDetailVo">
+		INSERT INTO product_detail(
+			<include refid="product_detail_column_simple"/>
+		) VALUES (
+			#{productDetailCustom.id},
+			#{productDetailCustom.pic1},
+			#{productDetailCustom.pic2},
+			#{productDetailCustom.pic3},
+			#{productDetailCustom.content}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.ProductDetailVo">
+    	update product_detail a
+    	<set>
+      		<if test="productDetailCustom.pic1 != null" >
+        		a.pic1 = #{productDetailCustom.pic1},
+	      	</if>
+	      	<if test="productDetailCustom.pic2 != null" >
+	        	a.pic2 = #{productDetailCustom.pic2},
+	      	</if>
+      		<if test="productDetailCustom.content != null" >
+	        	a.content = #{productDetailCustom.content},
+	      	</if>
+	      	<if test="productDetailCustom.pic3 != null" >
+	        	a.pic3 = #{productDetailCustom.pic3},
+	      	</if>
+    	</set>
+    	where a.id = #{productDetailCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from product_detail
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+</mapper>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.shop.AddressMapper" >
+	
+	<select id="getProvince" parameterType="java.lang.Integer" resultType="com.mall.ssm.po.dto.ProvinceDto">
+    	select
+    		*
+    	from tb_province a
+    	where a.id = #{id,jdbcType=INTEGER}
+	 </select>
+	 <select id="getCity" parameterType="java.lang.Integer" resultType="com.mall.ssm.po.dto.CityDto">
+    	select
+    		*
+    	from tb_city a
+    	where a.id = #{id,jdbcType=INTEGER}
+	 </select>
+	 <select id="getCounty" parameterType="java.lang.Integer" resultType="com.mall.ssm.po.dto.CountyDto">
+    	select
+    		*
+    	from tb_county a
+    	where a.id = #{id,jdbcType=INTEGER}
+	 </select>
+	
+	
+	
+</mapper>

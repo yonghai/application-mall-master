@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.wx.WxUserMapper" >
+
+	<!-- 微信用户属性字段 -->
+	<sql id="insert_column">
+		id,appid,nickName,avatarUrl,gender,city,province,addtime,state,userMobile
+	</sql>
+	<sql id="tb_wxuser_columns">
+		a.id AS "id",
+		a.appid AS "appid",
+		a.nickName AS "nickName",
+		a.avatarUrl AS "avatarUrl",
+		a.gender AS "gender",
+		a.city AS "city",
+		a.province AS "province",
+		a.addtime AS "addtime",
+		a.state AS "state",
+		a.userMobile AS "userMobile"
+	</sql>
+	
+	<!-- 定义微信用户查询的sql片段,就是微信用户查询条件 -->
+	<sql id="query_tb_wxuser_where">
+		<if test="wxUserCustom!=null">
+			1=1
+    		<if test="wxUserCustom.id != null and wxUserCustom.id != ''">
+				AND a.id = #{wxUserCustom.id}
+			</if>
+			<if test="wxUserCustom.appid != null and wxUserCustom.appid != ''">
+				AND a.appid = #{wxUserCustom.appid}
+			</if>
+			<if test="wxUserCustom.nickName != null and wxUserCustom.nickName != ''">
+				AND a.nickName = #{wxUserCustom.nickName}
+			</if>
+			<if test="wxUserCustom.avatarUrl != null and wxUserCustom.avatarUrl != ''">
+				AND a.avatarUrl = #{wxUserCustom.avatarUrl}
+			</if>
+			<if test="wxUserCustom.gender != null and wxUserCustom.gender != ''">
+				AND a.gender = #{wxUserCustom.gender}
+			</if>
+			<if test="wxUserCustom.city != null and wxUserCustom.city != ''">
+				AND a.city = #{wxUserCustom.city}
+			</if>
+			<if test="wxUserCustom.province != null and wxUserCustom.province != ''">
+				AND a.province = #{wxUserCustom.province}
+			</if>
+			<if test="wxUserCustom.addtime != null and wxUserCustom.addtime != ''">
+				AND a.addtime = #{wxUserCustom.addtime}
+			</if>
+			<if test="wxUserCustom.state != null and wxUserCustom.state != ''">
+				AND a.state = #{wxUserCustom.state}
+			</if>
+			<if test="wxUserCustom.userMobile != null and wxUserCustom.userMobile != ''">
+				AND a.userMobile = #{wxUserCustom.userMobile}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="getUserById"  parameterType="string" resultType="com.mall.ssm.po.custom.WxUserCustom" >
+    	select
+    		<include refid="tb_wxuser_columns"/>
+    	from tb_user a where a.appid=#{appid}
+	 </select>
+	 
+	 <select id="get" parameterType="com.mall.ssm.po.vo.WxUserVo" resultType="com.mall.ssm.po.custom.WxUserCustom" >
+    	select
+    		*
+    	from tb_user a
+    	<where>
+			<include refid="query_tb_wxuser_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.WxUserVo" resultType="Long">
+        select count(id) from tb_user a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.WxUserVo" resultType="com.mall.ssm.po.custom.WxUserCustom">
+		select
+    		<include refid="tb_wxuser_columns"/>
+    	from tb_user a
+    	<where>
+			<include refid="query_tb_wxuser_where"></include>
+		</where>
+    	LIMIT #{wxUserCustom.start},#{wxUserCustom.limit}
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.WxUserCustom" parameterType="com.mall.ssm.po.vo.WxUserVo" >
+    	select
+    		<include refid="tb_wxuser_columns"/>
+    	from tb_user a
+    	<where>
+			<include refid="query_tb_wxuser_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.WxUserVo">
+		INSERT INTO tb_user(
+			<include refid="insert_column"/>
+		) VALUES (
+			#{wxUserCustom.id},
+			#{wxUserCustom.appid},
+			#{wxUserCustom.nickName},
+			#{wxUserCustom.avatarUrl},
+			#{wxUserCustom.gender},
+			#{wxUserCustom.city},
+			#{wxUserCustom.province},
+			#{wxUserCustom.addtime},
+			#{wxUserCustom.state},
+			#{wxUserCustom.userMobile}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.WxUserVo">
+    	update tb_user a
+    	<set>
+	      	<if test="wxUserCustom.nickName != null" >
+	        	a.nickName = #{wxUserCustom.nickName},
+	      	</if>
+      		<if test="wxUserCustom.appid != null" >
+	        	a.appid = #{wxUserCustom.appid},
+	      	</if>
+	      	<if test="wxUserCustom.avatarUrl != null" >
+	        	a.avatarUrl = #{wxUserCustom.avatarUrl},
+	      	</if>
+	      	<if test="wxUserCustom.gender != null" >
+	        	a.gender = #{wxUserCustom.gender},
+	      	</if>
+	      	<if test="wxUserCustom.city != null" >
+	        	a.city = #{wxUserCustom.city},
+	      	</if>
+	      	<if test="wxUserCustom.province != null" >
+	        	a.province = #{wxUserCustom.province},
+	      	</if>
+	      	<if test="wxUserCustom.addtime != null" >
+	        	a.addtime = #{wxUserCustom.addtime},
+	      	</if>
+	      	<if test="wxUserCustom.state != null" >
+	        	a.state = #{wxUserCustom.state},
+	      	</if>
+	      	<if test="wxUserCustom.userMobile != null" >
+	        	a.userMobile = #{wxUserCustom.userMobile},
+	      	</if>
+    	</set>
+    	where a.appid = #{wxUserCustom.appid}
+  	</update>
+
+	
+	<delete id="delete" parameterType="int">
+	    delete from tb_user
+	    where id = #{id}
+	</delete>
+	
+	
+	<insert id="insertLoginRecord" parameterType="com.mall.ssm.po.vo.WxUserLoginRecordVo">
+		INSERT INTO tb_user_login_record(
+			appid,logintime,location,device
+		) VALUES (
+			#{wxUserLoginRecordCustom.appid},
+			#{wxUserLoginRecordCustom.logintime},
+			#{wxUserLoginRecordCustom.location},
+			#{wxUserLoginRecordCustom.device}
+		)
+	</insert>
+	<select id="getLoginRecodeList" resultType="com.mall.ssm.po.custom.WxUserLoginRecordCustom" parameterType="string" >
+    	select * from tb_user_login_record where date_format(logintime,'%Y-%m-%d')=#{dateStr}
+	 </select>
+	<select id="getNewUsers" resultType="com.mall.ssm.po.custom.WxUserCustom" parameterType="string" >
+    	select * from tb_user where date_format(addtime,'%Y-%m-%d')=#{dateStr}
+	 </select>
+</mapper>

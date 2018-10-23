@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.order.OrderMapper" >
+
+	<!--  属性字段 -->
+	<sql id="order_column_simple">
+		id,dateAdd,amountReal,amountLogistics,amount,status,orderNumber,remark,appid,productIds,productPics,trackingNumber,linkMan,logistics,mobile,address,discount,couponId
+	</sql>
+	<sql id="order_item_column_simple">
+		id,oid,goodsName,pic,amount,property,number,goodsId
+	</sql>
+	<sql id="order_column">
+		a.id AS "id",
+		a.dateAdd AS "dateAdd",
+		a.amountReal AS "amountReal",
+		a.amountLogistics AS "amountLogistics",
+		a.amount AS "amount",
+		a.status AS "status",
+		a.orderNumber AS "orderNumber",
+		a.remark AS "remark",
+		a.appid AS "appid",
+		a.productIds AS "productIds",
+		a.productPics AS "productPics",
+		a.trackingNumber AS "trackingNumber",
+		a.linkMan AS "linkMan",
+		a.logistics AS "logistics",
+		a.mobile AS "mobile",
+		a.address AS "address",
+		a.discount AS "discount",
+		a.couponId AS "couponId"
+	</sql>
+	<sql id="order_item_column">
+		a.id AS "id",
+		a.oid AS "oid",
+		a.goodsName AS "goodsName",
+		a.pic AS "pic",
+		a.amount AS "amount",
+		a.property AS "property",
+		a.number AS "number",
+		a.goodsId AS "goodsId"
+	</sql>
+	<!-- 定义 查询的sql片段,就是 查询条件 -->
+	<sql id="query_order_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="orderCustom!=null">
+			1=1
+    		<if test="orderCustom.id != null and orderCustom.id != ''">
+				AND a.id = #{orderCustom.id}
+			</if>
+			<!-- 使用mybatis时遇到一个问题，Java代码中传递的整数0在mybatis中被识别成null -->
+			<if test="orderCustom.status != null and orderCustom.status != '' or orderCustom.status==0">
+				AND a.status = #{orderCustom.status,jdbcType=INTEGER}
+			</if>
+			<if test="orderCustom.orderNumber != null and orderCustom.orderNumber != ''">
+				AND a.orderNumber = #{orderCustom.orderNumber}
+			</if>
+			<if test="orderCustom.appid != null and orderCustom.appid != ''">
+				AND a.appid = #{orderCustom.appid}
+			</if>
+			<if test="orderCustom.trackingNumber != null and orderCustom.trackingNumber != ''">
+				AND a.trackingNumber = #{orderCustom.trackingNumber}
+			</if>
+			<if test="orderCustom.linkMan != null and orderCustom.linkMan != ''">
+				AND a.linkMan = #{orderCustom.linkMan}
+			</if>
+			<if test="orderCustom.logistics != null and orderCustom.logistics != ''">
+				AND a.logistics = #{orderCustom.logistics}
+			</if>
+			<if test="orderCustom.couponId != null and orderCustom.couponId != ''">
+				AND a.couponId = #{orderCustom.couponId}
+			</if>
+		</if>
+	</sql>
+
+	<resultMap type="com.mall.ssm.po.custom.OrderCustom" id="OrderResultMap">
+		<id column="id" property="id"/>
+		<result column="dateAdd" property="dateAdd"/>
+		<result column="amountReal" property="amountReal"/>
+		<result column="amountLogistics" property="amountLogistics"/>
+		<result column="amount" property="amount"/>
+		<result column="status" property="status"/>
+		<result column="orderNumber" property="orderNumber"/>
+		<result column="remark" property="remark"/>
+		<result column="appid" property="appid"/>
+		<result column="productIds" property="productIds"/>
+		<result column="productPics" property="productPics"/>
+		<result column="trackingNumber" property="trackingNumber"/>
+		<result column="linkMan" property="linkMan"/>
+		<result column="logistics" property="logistics"/>
+		<result column="mobile" property="mobile"/>
+		<result column="address" property="address"/>
+		<result column="discount" property="discount"/>
+		<result column="couponId" property="couponId"/>
+	</resultMap>
+	<resultMap type="com.mall.ssm.po.custom.OrderCustom" id="OrderAndItemResultMap" extends="OrderResultMap">
+		 <collection property="orderdetails" ofType="com.mall.ssm.po.custom.OrderItemCustom">
+		 	<id column="item_id" property="id"/>
+		 	<result column="orderNumber" property="oid"/>
+		 	<result column="item_goodsName" property="goodsName"/>
+		 	<result column="item_pic" property="pic"/>
+		 	<result column="item_amount" property="amount"/>
+		 	<result column="item_property" property="property"/>
+		 	<result column="items_number" property="number"/>
+		 	<result column="items_goodsId" property="goodsId"/>
+		 </collection>
+	</resultMap>
+	
+	<!-- 获取一个详细的订单 -->
+	<select id="getOrderWithItems" parameterType="string" resultMap="OrderAndItemResultMap" >
+		SELECT 
+		  tb_order.*,
+		  tb_orderitem.id item_id,
+		  tb_orderitem.goodsName item_goodsName,
+		  tb_orderitem.pic item_pic,
+		  tb_orderitem.amount item_amount,
+		  tb_orderitem.property item_property,
+		  tb_orderitem.number items_number,
+		  tb_orderitem.goodsId items_goodsId
+		FROM
+		  tb_order,
+		  tb_orderitem
+		WHERE tb_order.orderNumber = tb_orderitem.oid AND tb_order.orderNumber = #{orderNumber}
+	</select>	
+	<select id="getOrderSimple" parameterType="com.mall.ssm.po.vo.OrderVo" resultType="com.mall.ssm.po.custom.OrderCustom" >
+		select
+    		<include refid="order_column"/>
+    	from tb_order a
+    	<where>
+			<include refid="query_order_where"></include>
+		</where>
+	</select>	
+	
+	
+	
+	<resultMap type="com.mall.ssm.po.custom.OrderCustom" id="OrderListWithUserResultMap">
+		<id column="id" property="id"/>
+		<result column="dateAdd" property="dateAdd"/>
+		<result column="amountReal" property="amountReal"/>
+		<result column="amountLogistics" property="amountLogistics"/>
+		<result column="amount" property="amount"/>
+		<result column="status" property="status"/>
+		<result column="orderNumber" property="orderNumber"/>
+		<result column="remark" property="remark"/>
+		<result column="appid" property="appid"/>
+		<result column="productIds" property="productIds"/>
+		<result column="productPics" property="productPics"/>
+		<result column="productPics" property="productPics"/>
+		<result column="trackingNumber" property="trackingNumber"/>
+		<result column="linkMan" property="linkMan"/>
+		<result column="logistics" property="logistics"/>
+		<result column="mobile" property="mobile"/>
+		<result column="address" property="address"/>
+		<result column="discount" property="discount"/>
+		<result column="couponId" property="couponId"/>
+		<association property="user"  javaType="com.mall.ssm.po.custom.WxUserCustom"
+		 	select="com.mall.ssm.mapper.wx.WxUserMapper.getUserById" column="appid">
+		</association>
+	</resultMap>
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.CouponsVo" resultType="Long">
+        select count(id) from tb_order a
+        <where>
+			<include refid="query_order_where"></include>
+		</where>
+	</select>
+	<select id="getOrderListByPage" parameterType="com.mall.ssm.po.vo.OrderVo" resultMap="OrderListWithUserResultMap">
+		select
+    		<include refid="order_column"/>
+    	from tb_order a
+    	<where>
+			<include refid="query_order_where"></include>
+		</where>
+		order by dateAdd desc
+    	LIMIT #{orderCustom.start},#{orderCustom.limit}
+	</select>	
+	
+	<insert id="insertOrder" parameterType="com.mall.ssm.po.vo.OrderVo">
+		INSERT INTO tb_order(
+			<include refid="order_column_simple"/>
+		) VALUES (
+			#{orderCustom.id},
+			#{orderCustom.dateAdd},
+			#{orderCustom.amountReal},
+			#{orderCustom.amountLogistics},
+			#{orderCustom.amount},
+			#{orderCustom.status},
+			#{orderCustom.orderNumber},
+			#{orderCustom.remark},
+			#{orderCustom.appid},
+			#{orderCustom.productIds},
+			#{orderCustom.productPics},
+			#{orderCustom.trackingNumber},
+			#{orderCustom.linkMan},
+			#{orderCustom.logistics},
+			#{orderCustom.mobile},
+			#{orderCustom.address},
+			#{orderCustom.discount},
+			#{orderCustom.couponId}
+		)
+	</insert>
+	<insert id="insertOrderItemBatch"  parameterType="java.util.List">
+		INSERT INTO tb_orderitem(
+			<include refid="order_item_column_simple"/>
+		) VALUES
+	       <foreach collection="list" item="item" index="index" separator="," >
+	       (#{item.orderItemCustom.id},
+			#{item.orderItemCustom.oid},
+			#{item.orderItemCustom.goodsName},
+			#{item.orderItemCustom.pic},
+			#{item.orderItemCustom.amount},
+			#{item.orderItemCustom.property},
+			#{item.orderItemCustom.number},
+			#{item.orderItemCustom.goodsId})
+	       </foreach>
+  	</insert>
+  	
+	<update id="updateOrder" parameterType="com.mall.ssm.po.vo.OrderVo">
+    	update tb_order a
+    	<set>
+	      	<if test="orderCustom.status != null" >
+	        	a.status = #{orderCustom.status},
+	      	</if>
+      		<if test="orderCustom.discount != null" >
+	        	a.discount = #{orderCustom.discount},
+	      	</if>
+	      	<if test="orderCustom.couponId != null" >
+	        	a.couponId = #{orderCustom.couponId},
+	      	</if>
+	      	<if test="orderCustom.logistics != null" >
+	        	a.logistics = #{orderCustom.logistics},
+	      	</if>
+	      	<if test="orderCustom.trackingNumber != null" >
+	        	a.trackingNumber = #{orderCustom.trackingNumber},
+	      	</if>
+    	</set>
+    	where a.orderNumber = #{orderCustom.orderNumber}
+  	</update>
+	
+	<delete id="deleteOrder" parameterType="string">
+		DELETE a.*, b.*
+		FROM tb_order a, tb_orderitem b
+		WHERE a.orderNumber = b.oid AND a.orderNumber=#{id}
+	</delete>
+	
+	
+	<select id="getOrderByDate" resultType="com.mall.ssm.po.custom.OrderCustom" parameterType="string" >
+    	select * from tb_order where date_format(dateAdd,'%Y-%m-%d')=#{dateStr}
+	 </select>
+	
+	
+	
+	
+	
+	
+</mapper>

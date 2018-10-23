@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.user.UserMapper" >
+
+	<!-- 用户属性字段 -->
+	<sql id="user_column_simple">
+		id,loginName,pwd,img,email,sex,mobile,status,name,roleId,activationCode,appid
+	</sql>
+	<sql id="user_columns">
+		a.id AS "id",
+		a.loginName AS "loginName",
+		a.pwd AS "pwd",
+		a.img AS "img",
+		a.email AS "email",
+		a.sex AS "sex",
+		a.mobile AS "mobile",
+		a.status AS "status",
+		a.name AS "name",
+		a.roleId AS "roleId",
+		a.activationCode AS "activationCode",
+		a.appid AS "appid"
+	</sql>
+	
+	<!-- 定义用户查询的sql片段,就是用户查询条件 -->
+	<sql id="query_user_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="userCustom!=null">
+			1=1
+    		<if test="userCustom.id != null and userCustom.id != ''">
+				AND a.id = #{userCustom.id}
+			</if>
+			<if test="userCustom.loginName != null and userCustom.loginName != ''">
+				AND a.loginName = #{userCustom.loginName}
+			</if>
+			<if test="userCustom.img != null and userCustom.img != ''">
+				AND a.img = #{userCustom.img}
+			</if>
+			<if test="userCustom.pwd != null and userCustom.pwd != ''">
+				AND a.pwd = #{userCustom.pwd}
+			</if>
+			<if test="userCustom.email != null and userCustom.email != ''">
+				AND a.email = #{userCustom.email}
+			</if>
+			<if test="userCustom.sex != null and userCustom.sex != ''">
+				AND a.sex = #{userCustom.sex}
+			</if>
+			<if test="userCustom.mobile != null and userCustom.mobile != ''">
+				AND a.mobile = #{userCustom.mobile}
+			</if>
+			<if test="userCustom.status != null and userCustom.status != ''">
+				AND a.status = #{userCustom.status}
+			</if>
+			<if test="userCustom.name!=null and userCustom.name!=''">
+				AND a.name = #{userCustom.name}
+			</if>
+			<if test="userCustom.roleId!=null and userCustom.roleId!=''">
+				AND a.roleId = #{userCustom.roleId}
+			</if>
+			<if test="userCustom.activationCode!=null and userCustom.activationCode!=''">
+				AND a.activationCode = #{userCustom.activationCode}
+			</if>
+			<if test="userCustom.appid!=null and userCustom.appid!=''">
+				AND a.appid = #{userCustom.appid}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.UserVo" resultType="com.mall.ssm.po.custom.UserCustom" >
+    	select
+    		<include refid="user_columns"/>
+    	from sys_user a
+    	<where>
+			<include refid="query_user_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.UserVo" resultType="Long">
+        select count(id) from sys_user a
+	</select>
+	
+	<select id="getListByPage" parameterType="com.mall.ssm.po.vo.UserVo" resultType="com.mall.ssm.po.custom.UserCustom">
+		select
+    		<include refid="user_columns"/>
+    	from sys_user a
+    	<where>
+			<include refid="query_user_where"></include>
+		</where>
+    	LIMIT #{start},#{limit}
+    	
+    	<!-- sqlserver用这个
+    	
+    	SELECT
+			      TOP ${limit} *
+			  FROM
+			      (
+			          SELECT
+			              ROW_NUMBER () OVER (ORDER BY id ASC) RowNumber ,<include refid="columns"/>
+			          FROM
+			              sys_user a
+			      ) A
+			 WHERE
+			     A.RowNumber > (#{start} - 1) * #{limit}
+    	 -->
+	</select>	
+	
+	
+	<select id="getAllList" resultType="com.mall.ssm.po.custom.UserCustom" parameterType="com.mall.ssm.po.vo.UserVo" >
+    	select
+    		<include refid="user_columns"/>
+    	from sys_user a
+    	<where>
+			<include refid="query_user_where"></include>
+		</where>
+	 </select>
+	
+	
+	<insert id="insert" parameterType="com.mall.ssm.po.vo.UserVo">
+		INSERT INTO sys_user(
+			<include refid="user_column_simple"/>
+		) VALUES (
+			#{userCustom.id},
+			#{userCustom.loginName},
+			#{userCustom.pwd},
+			#{userCustom.img},
+			#{userCustom.email},
+			#{sex},
+			#{userCustom.mobile},
+			#{userCustom.status},
+			#{userCustom.name},
+			#{userCustom.roleId},
+			#{userCustom.activationCode},
+			#{userCustom.appid}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.UserVo" >
+    	update sys_user
+    	<set >
+      		<if test="loginName != null" >
+        		loginName = #{userCustom.loginName},
+	      	</if>
+	      	<if test="pwd != null" >
+	        	pwd = #{userCustom.pwd},
+	      	</if>
+      		<if test="img != null" >
+	        	img = #{userCustom.img},
+	      	</if>
+	      	<if test="email != null" >
+	        	email = #{userCustom.email},
+	      	</if>
+	      	<if test="sex != null" >
+	        	sex = #{userCustom.sex},
+	      	</if>
+	      	<if test="mobile != null" >
+	        	mobile = #{userCustom.mobile},
+	      	</if>
+	      	<if test="status != null" >
+	        	status = #{userCustom.status},
+	      	</if>
+	      	<if test="name != null" >
+	        	name = #{userCustom.name},
+	      	</if>
+	      	<if test="roleId != null" >
+	        	roleId = #{userCustom.roleId},
+	      	</if>
+	      	<if test="activationCode != null" >
+	        	activationCode = #{userCustom.activationCode},
+	      	</if>
+	      	<if test="appid != null" >
+	        	appid = #{userCustom.appid},
+	      	</if>
+    	</set>
+    	where id = #{userCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer" >
+	    delete from sys_user
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+	
+	
+	
+</mapper>

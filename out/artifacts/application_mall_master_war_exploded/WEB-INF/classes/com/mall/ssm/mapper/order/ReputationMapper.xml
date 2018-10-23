@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.mall.ssm.mapper.order.ReputationMapper" >
+
+	<!--  属性字段 -->
+	<sql id="reputation_column_simple">
+		id,goodsId,reputation,remark,appid,dataAdd
+	</sql>
+	<sql id="reputation_columns">
+		a.id AS "id",
+		a.goodsId AS "goodsId",
+		a.reputation AS "reputation",
+		a.remark AS "remark",
+		a.appid AS "appid",
+		a.dataAdd AS "dataAdd"
+	</sql>
+	
+	<!-- 定义评论查询的sql片段,就是评论查询条件 -->
+	<sql id="query_reputation_where">
+		<!-- 使用动态sql,通过if判断,满足条件进行sql拼接 -->
+		<!-- 商品查询条件通过ItemsQueryVo包装对象中itemsCustom属性传递 -->
+		<if test="reputationCustom!=null">
+			1=1
+    		<if test="reputationCustom.id != null and reputationCustom.id != ''">
+				AND a.id = #{reputationCustom.id}
+			</if>
+			<if test="reputationCustom.reputation != null and reputationCustom.reputation != ''">
+				AND a.reputation = #{reputationCustom.reputation}
+			</if>
+			<if test="reputationCustom.remark != null and reputationCustom.remark != ''">
+				AND a.remark = #{reputationCustom.remark}
+			</if>
+			<if test="reputationCustom.reputation != null and reputationCustom.reputation != ''">
+				AND a.reputation = #{reputationCustom.reputation}
+			</if>
+			<if test="reputationCustom.appid != null and reputationCustom.appid != ''">
+				AND a.appid = #{reputationCustom.appid}
+			</if>
+			<if test="reputationCustom.dataAdd != null and reputationCustom.dataAdd != ''">
+				AND a.dataAdd = #{reputationCustom.dataAdd}
+			</if>
+			<if test="reputationCustom.goodsId != null and reputationCustom.goodsId != ''">
+				AND a.goodsId = #{reputationCustom.goodsId}
+			</if>
+		</if>
+	</sql>
+	
+	
+	<select id="get" parameterType="com.mall.ssm.po.vo.ReputationVo" resultType="com.mall.ssm.po.custom.ReputationCustom" >
+    	select
+    		<include refid="reputation_columns"/>
+    	from tb_reputation a
+    	<where>
+			<include refid="query_reputation_where"></include>
+		</where>
+	 </select>
+	
+	
+	<select id="getCount" parameterType="com.mall.ssm.po.vo.ReputationVo" resultType="Long">
+        select count(id) from tb_reputation a
+	</select>
+	
+	<resultMap type="com.mall.ssm.po.custom.ReputationCustom" id="ReputationListWithUserResultMap">
+		<id column="id" property="id"/>
+		<result column="goodsId" property="goodsId"/>
+		<result column="reputation" property="reputation"/>
+		<result column="remark" property="remark"/>
+		<result column="appid" property="appid"/>
+		<result column="dataAdd" property="dataAdd"/>
+		<!-- 使用extends继承 -->
+		<association property="user"  javaType="com.mall.ssm.po.custom.WxUserCustom"
+		 	select="com.mall.ssm.mapper.wx.WxUserMapper.getUserById" column="appid">
+		</association>
+		<association property="productCustom"  javaType="com.mall.ssm.po.custom.ProductCustom"
+		 	select="com.mall.ssm.mapper.product.ProductMapper.getProductById" column="goodsId">
+		</association>
+	</resultMap>
+	<select id="getListByPage" resultMap="ReputationListWithUserResultMap" parameterType="com.mall.ssm.po.vo.ReputationVo" >
+		select
+    		<include refid="reputation_columns"/>
+    	from tb_reputation a
+    	<where>
+			<include refid="query_reputation_where"></include>
+		</where>
+		order by dataAdd desc
+    	LIMIT #{reputationCustom.start},#{reputationCustom.limit}
+	</select>	
+	
+	<resultMap type="com.mall.ssm.po.custom.ReputationCustom" id="ReputationResultMap">
+		<id column="id" property="id"/>
+		<result column="goodsId" property="goodsId"/>
+		<result column="reputation" property="reputation"/>
+		<result column="remark" property="remark"/>
+		<result column="appid" property="appid"/>
+		<result column="dataAdd" property="dataAdd"/>
+	</resultMap>
+	<resultMap type="com.mall.ssm.po.custom.ReputationCustom" id="ReputationWithUserResultMap" extends="ReputationResultMap">
+		<!-- 使用extends继承 -->
+		<association property="user"  javaType="com.mall.ssm.po.custom.WxUserCustom"
+		 	select="com.mall.ssm.mapper.wx.WxUserMapper.getUserById" column="appid">
+		</association>
+	</resultMap>
+	<select id="getAllList" resultMap="ReputationWithUserResultMap" parameterType="com.mall.ssm.po.vo.ReputationVo" >
+    	select
+    		<include refid="reputation_columns"/>
+    	from tb_reputation a
+    	<where>
+			<include refid="query_reputation_where"></include>
+		</where>
+	 </select>
+	
+	<insert id="insertBatch"  parameterType="java.util.List">
+		INSERT INTO tb_reputation(
+			<include refid="reputation_column_simple"/>
+		) VALUES 
+	       <foreach collection="list" item="item" index="index" separator="," >
+	       (#{item.reputationCustom.id},
+			#{item.reputationCustom.goodsId},
+			#{item.reputationCustom.reputation},
+			#{item.reputationCustom.remark},
+			#{item.reputationCustom.appid},
+			#{item.reputationCustom.dataAdd})
+	       </foreach>
+  	</insert>
+  	<insert id="insert" parameterType="com.mall.ssm.po.vo.ReputationVo">
+		INSERT INTO tb_reputation(
+			<include refid="reputation_column_simple"/>
+		) VALUES (
+			#{item.reputationCustom.id},
+			#{item.reputationCustom.goodsId},
+			#{item.reputationCustom.reputation},
+			#{item.reputationCustom.remark},
+			#{item.reputationCustom.appid},
+			#{item.reputationCustom.dataAdd}
+		)
+	</insert>
+	
+	<update id="update" parameterType="com.mall.ssm.po.vo.ReputationVo">
+    	update tb_reputation a
+    	<set>
+      		<if test="reputationCustom.goodsId != null" >
+        		a.goodsId = #{reputationCustom.goodsId},
+	      	</if>
+	      	<if test="reputationCustom.remark != null" >
+	        	a.remark = #{reputationCustom.remark},
+	      	</if>
+      		<if test="reputationCustom.reputation != null" >
+	        	a.reputation = #{reputationCustom.reputation},
+	      	</if>
+	      	<if test="reputationCustom.appid != null" >
+	        	a.appid = #{reputationCustom.appid},
+	      	</if>
+	      	<if test="reputationCustom.dataAdd != null" >
+	        	a.dataAdd = #{reputationCustom.dataAdd},
+	      	</if>
+    	</set>
+    	where a.id = #{reputationCustom.id,jdbcType=INTEGER}
+  	</update>
+
+	
+	<delete id="delete" parameterType="java.lang.Integer">
+	    delete from tb_reputation
+	    where id = #{id,jdbcType=INTEGER}
+	</delete>
+</mapper>
